@@ -24,6 +24,8 @@ import java.util.stream.Stream;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.mongodb.core.query.Query;
+
 import com.avanza.ymer.plugin.PostReadProcessor;
 import com.avanza.ymer.util.OptionalUtil;
 
@@ -119,7 +121,11 @@ final class MirroredObjectLoader<T> {
     }
 
     List<LoadedDocument<T>> loadByQuery(T template) {
-        return documentCollection.findByQuery(documentConverter.toQuery(template))
+    	Query query = documentConverter.toQuery(template);
+    	if (mirroredObject.loadDocumentsRouted()) {
+    		query.addCriteria(MongoPartitionFilter.buildCriteriaFilter(spaceObjectFilter.getPartitionFilter()));
+    	}
+        return documentCollection.findByQuery(query)
                 .map(this::patchAndConvert)
                 .flatMap(OptionalUtil::asStream)
                 .collect(Collectors.toList());

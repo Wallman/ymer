@@ -26,7 +26,14 @@ import java.util.stream.Collectors;
 
 import org.bson.Document;
 import org.junit.Test;
+import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
+import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
+import org.springframework.data.mongodb.core.convert.MongoConverter;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.core.query.Query;
+
 import com.avanza.ymer.MirroredObjectLoader.LoadedDocument;
 import com.avanza.ymer.plugin.PostReadProcessor;
 import com.gigaspaces.annotation.pojo.SpaceId;
@@ -50,8 +57,8 @@ public class MongoDocumentCollectionTest extends DocumentCollectionContract {
 
 	private MongoDatabase database;
 	private MongoCollection<Document> collection;
-	private MongoServer mongoServer;
-	private MongoClient mongoClient;
+	private final MongoServer mongoServer;
+	private final MongoClient mongoClient;
 
 	public MongoDocumentCollectionTest() {
 		mongoServer = new MongoServer(new MemoryBackend());
@@ -171,13 +178,88 @@ public class MongoDocumentCollectionTest extends DocumentCollectionContract {
 		assertEquals(2, loadedSpaceObjects.size());
 	}
 
+	
+	@Test
+	public void canLoadDocumentsByTemplateRouted() throws Exception {
+		DocumentPatch[] patches = {};
+		MirroredObject<FakeSpaceObject> mirroredObject = MirroredObjectDefinition.create(FakeSpaceObject.class)
+				.loadDocumentsRouted(true).documentPatches(patches)
+				.buildMirroredDocument(MirroredObjectDefinitionsOverride.noOverride());
+
+		// Objects WITH routed field
+		Document doc1 = new Document();
+		doc1.put("_id", 1);
+		doc1.put("value", "a");
+		mirroredObject.setDocumentAttributes(doc1, new FakeSpaceObject(1, "a"));
+
+		final Document doc2 = new Document();
+		doc2.put("_id", 2);
+		doc2.put("value", "a");
+		mirroredObject.setDocumentAttributes(doc2, new FakeSpaceObject(2, "a"));
+
+		// Object WITHOUT routed field. This should be read from db and accepted
+		final Document doc3 = new Document();
+		doc3.put("_id", 3);
+		doc3.put("value", "a");
+
+		// Object WITHOUT routed field. This should be read from db but not accepted
+		final Document doc4 = new Document();
+		doc4.put("_id", 4);
+		doc4.put("value", "a");
+
+		// Object with correct routed field but with wrong "value" value. This should not be read from db
+		final Document doc5 = new Document();
+		doc5.put("_id", 5);
+		doc5.put("value", "b");
+		mirroredObject.setDocumentAttributes(doc5, new FakeSpaceObject(5, "b"));
+
+
+		MongoDocumentCollectionTest testCollection = new MongoDocumentCollectionTest();
+		DocumentCollection documentCollection = testCollection.createEmptyCollection();
+		documentCollection.insertAll(doc1, doc2, doc3, doc4, doc5);
+
+		
+		MirroredObjectLoader<FakeSpaceObject> documentLoader = new MirroredObjectLoader<>(
+				documentCollection,
+				FakeMirroredDocumentConverter.create(new GenericMongoConverter(new SimpleMongoDbFactory(mongoClient, DBNAME))),
+				mirroredObject,
+				SpaceObjectFilter.partitionFilter(mirroredObject, 2, 2),
+				new MirrorContextProperties(2, 2),
+				noOpPostReadProcessor());
+
+		List<FakeSpaceObject> loadedSpaceObjects = documentLoader.loadByQuery(new FakeSpaceObject(null, "a"))
+					  .stream()
+					  .map(LoadedDocument::getDocument)
+					  .collect(Collectors.toList());
+
+
+		assertTrue(loadedSpaceObjects.toString(), loadedSpaceObjects.contains(new FakeSpaceObject(1, "a")));
+		assertTrue(loadedSpaceObjects.toString(), loadedSpaceObjects.contains(new FakeSpaceObject(3, "a")));
+		assertEquals(2, loadedSpaceObjects.size());
+	}
+
+	
 	static class FakeSpaceObject {
-		private final Integer id;
-		private final String value;
+		private  Integer id;
+		private String value;
+		
+		public FakeSpaceObject() {
+		}
+
 		private FakeSpaceObject(Integer id, String value) {
 			this.id = id;
 			this.value = value;
 		}
+		
+		public void setId(Integer id) {
+			this.id = id;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
+
+
 		@SpaceId(autoGenerate = true)
 		public final Integer getId() {
 			return id;
@@ -212,6 +294,16 @@ public class MongoDocumentCollectionTest extends DocumentCollectionContract {
 
 
 	private static class FakeMirroredDocumentConverter implements DocumentConverter.Provider {
+		private final MongoConverter converter;
+
+		public FakeMirroredDocumentConverter() {
+			this(null);
+		}
+		
+		public FakeMirroredDocumentConverter(MongoConverter converter) {
+			this.converter = converter;
+		}
+
 		@Override
 		public <T> T convert(Class<T> toType, Document document) {
 			Integer id = Optional.ofNullable(document.getInteger("_id"))
@@ -229,6 +321,10 @@ public class MongoDocumentCollectionTest extends DocumentCollectionContract {
 			return DocumentConverter.create(new FakeMirroredDocumentConverter());
 		}
 
+		public static DocumentConverter create(MongoConverter converter) {
+			return DocumentConverter.create(new FakeMirroredDocumentConverter(converter));
+		}
+
 		@Override
 		public Object convert(Object type) {
 			if (type instanceof Number) {
@@ -239,7 +335,12 @@ public class MongoDocumentCollectionTest extends DocumentCollectionContract {
 
 		@Override
 		public Query toQuery(Object template) {
-			throw new UnsupportedOperationException();
+			if (converter == null) {
+				throw new UnsupportedOperationException();
+			} else {
+				return new MongoQueryFactory(converter).createMongoQueryFromTemplate(template);
+			}
+
 		}
 	}
 
@@ -247,4 +348,11 @@ public class MongoDocumentCollectionTest extends DocumentCollectionContract {
 		return (postRead) -> postRead;
 	}
 
+	private static class GenericMongoConverter extends MappingMongoConverter {
+
+		public GenericMongoConverter(MongoDbFactory mongoDbFactory) {
+			super(new DefaultDbRefResolver(mongoDbFactory), new MongoMappingContext());
+		}
+
+	}
 }

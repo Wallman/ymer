@@ -22,6 +22,7 @@ import java.util.stream.StreamSupport;
 
 import org.bson.Document;
 import org.springframework.data.mongodb.core.query.Query;
+
 import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.Filters;
@@ -34,7 +35,7 @@ import com.mongodb.client.model.UpdateOptions;
  */
 final class MongoDocumentCollection implements DocumentCollection {
 
-	private MongoCollection<Document> collection;
+	private final MongoCollection<Document> collection;
 
 	public MongoDocumentCollection(MongoCollection<Document> collection) {
 		this.collection = Objects.requireNonNull(collection);

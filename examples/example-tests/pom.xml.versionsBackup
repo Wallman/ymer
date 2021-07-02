@@ -3,40 +3,34 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.avanza.ymer</groupId>
-		<artifactId>ymer-parent</artifactId>
-		<version>load-by-template-routed-SNAPSHOT</version>
+		<artifactId>examples</artifactId>
+		<version>2.0.3-SNAPSHOT</version>
 	</parent>
-	<artifactId>ymer-test</artifactId>
+	<artifactId>example-tests</artifactId>
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>ymer</artifactId>
+			<artifactId>example-pu</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest</artifactId>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>example-mirror-pu</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-library</artifactId>
+			<groupId>com.avanza.gs</groupId>
+			<artifactId>gs-test</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.hamcrest</groupId>
-			<artifactId>hamcrest-core</artifactId>
+			<groupId>de.bwaldvogel</groupId>
+			<artifactId>mongo-java-server</artifactId>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-slf4j-impl</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.logging.log4j</groupId>
-			<artifactId>log4j-core</artifactId>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

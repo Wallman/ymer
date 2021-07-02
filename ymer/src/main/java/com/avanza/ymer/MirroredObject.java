@@ -18,6 +18,7 @@ package com.avanza.ymer;
 import java.lang.reflect.Method;
 
 import org.bson.Document;
+
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
 import com.mongodb.ReadPreference;
@@ -120,6 +121,7 @@ final class MirroredObject<T> {
 		Object routingKey = routingKeyExtractor.getRoutingKey(spaceObject);
 		if (routingKey != null) {
 			document.put(DOCUMENT_ROUTING_KEY, routingKey.hashCode());
+//			document.put("_shard", Math.abs(routingKey.hashCode()) % 1024);
 		}
 	}
 
