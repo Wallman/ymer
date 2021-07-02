@@ -18,8 +18,12 @@ package com.avanza.ymer;
 import java.util.Arrays;
 import java.util.Objects;
 
+import org.bson.conversions.Bson;
+import org.springframework.data.mongodb.core.query.Criteria;
+
 import com.avanza.ymer.SpaceObjectFilter.PartitionFilter;
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.model.Filters;
 
 class MongoPartitionFilter {
 
@@ -38,6 +42,9 @@ class MongoPartitionFilter {
 	}
 
 	private static BasicDBObject buildFilter(PartitionFilter<?> partitionFilter) {
+//		int maxShards = 1024;
+//		int[] shards = IntStream.range(0, maxShards).filter(i -> i%partitionFilter.getCurrentPartition() == 0).toArray();
+//		return new BasicDBObject("_shard", new BasicDBObject("$in", shards));
 		return new BasicDBObject("$or", Arrays.asList(
 				new BasicDBObject(MirroredObject.DOCUMENT_ROUTING_KEY, new BasicDBObject("$mod", Arrays.asList(partitionFilter.getTotalPartitions(), partitionFilter.getCurrentPartition() - 1))),
 				new BasicDBObject(MirroredObject.DOCUMENT_ROUTING_KEY, new BasicDBObject("$mod", Arrays.asList(partitionFilter.getTotalPartitions(), -(partitionFilter.getCurrentPartition() - 1)))),
@@ -47,6 +54,23 @@ class MongoPartitionFilter {
 
 	public BasicDBObject toDBObject() {
 		return filter;
+	}
+
+	public static Bson buildBsonFilter(PartitionFilter<?> partitionFilter) {
+		return Filters.or(Filters.mod(MirroredObject.DOCUMENT_ROUTING_KEY,
+									  partitionFilter.getTotalPartitions(),
+									  partitionFilter.getCurrentPartition() - 1),
+						  Filters.mod(MirroredObject.DOCUMENT_ROUTING_KEY,
+									  partitionFilter.getTotalPartitions(),
+									  -(partitionFilter.getCurrentPartition() - 1)),
+						  Filters.exists(MirroredObject.DOCUMENT_ROUTING_KEY, false));
+	}
+
+	public static Criteria buildCriteriaFilter(PartitionFilter<?> partitionFilter) {
+		return new Criteria().orOperator(Criteria.where(MirroredObject.DOCUMENT_ROUTING_KEY).mod(partitionFilter.getTotalPartitions(), partitionFilter.getCurrentPartition() - 1),
+				Criteria.where(MirroredObject.DOCUMENT_ROUTING_KEY).mod(partitionFilter.getTotalPartitions(), -(partitionFilter.getCurrentPartition() - 1)),
+				Criteria.where(MirroredObject.DOCUMENT_ROUTING_KEY).exists(false));
+		
 	}
 
 	@Override

@@ -4,9 +4,10 @@
     <parent>
         <groupId>com.avanza.ymer14</groupId>
         <artifactId>ymer-parent</artifactId>
-        <version>14.1.2-SNAPSHOT</version>
+        <version>load-by-template-routed-14-SNAPSHOT</version>
     </parent>
     <artifactId>ymer</artifactId>
+        <version>load-by-template-routed-14-SNAPSHOT</version>
 
     <dependencies>
         <dependency>

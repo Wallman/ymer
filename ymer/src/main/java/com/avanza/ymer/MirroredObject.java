@@ -15,12 +15,12 @@
  */
 package com.avanza.ymer;
 
+import java.lang.reflect.Method;
+
 import com.gigaspaces.annotation.pojo.SpaceId;
 import com.gigaspaces.annotation.pojo.SpaceRouting;
 import com.mongodb.BasicDBObject;
 import com.mongodb.ReadPreference;
-
-import java.lang.reflect.Method;
 /**
  * Holds information about one mirrored space object type.
  *
@@ -119,6 +119,7 @@ final class MirroredObject<T> {
 		Object routingKey = routingKeyExtractor.getRoutingKey(spaceObject);
 		if (routingKey != null) {
 			dbObject.put(DOCUMENT_ROUTING_KEY, routingKey.hashCode());
+//			document.put("_shard", Math.abs(routingKey.hashCode()) % 1024);
 		}
 	}
 

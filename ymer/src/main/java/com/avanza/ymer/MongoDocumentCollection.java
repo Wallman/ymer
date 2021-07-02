@@ -72,20 +72,20 @@ final class MongoDocumentCollection implements DocumentCollection {
 	public void replace(DBObject oldVersion, DBObject newVersion) {
 		if (!oldVersion.get("_id").equals(newVersion.get("_id"))) {
 			dbCollection.insert(newVersion);
-            dbCollection.remove(new BasicDBObject("_id", oldVersion.get("_id")));
-        } else {
-            dbCollection.update(new BasicDBObject("_id", oldVersion.get("_id")), newVersion);
-        }
+			dbCollection.remove(new BasicDBObject("_id", oldVersion.get("_id")));
+		} else {
+			dbCollection.update(new BasicDBObject("_id", oldVersion.get("_id")), newVersion);
+		}
 	}
 
 	@Override
 	public void update(DBObject newVersion) {
-        dbCollection.save(newVersion);
+		dbCollection.save(newVersion);
 	}
 
 	@Override
 	public void insert(DBObject dbObject) {
-        try {
+		try {
 			dbCollection.insert(dbObject);
 		} catch (DuplicateKeyException e) {
 			throw new DuplicateDocumentKeyException(e.getMessage());
@@ -94,12 +94,12 @@ final class MongoDocumentCollection implements DocumentCollection {
 
 	@Override
 	public void delete(BasicDBObject dbObject) {
-        dbCollection.remove(dbObject);
+		dbCollection.remove(dbObject);
 	}
 
 	@Override
 	public void insertAll(DBObject... dbObjects) {
-        dbCollection.insert(dbObjects); // TODO: test for this method
+		dbCollection.insert(dbObjects); // TODO: test for this method
 	}
 
 }
