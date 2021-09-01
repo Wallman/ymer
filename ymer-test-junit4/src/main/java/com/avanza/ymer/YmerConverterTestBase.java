@@ -35,10 +35,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.support.PersistenceExceptionTranslator;
-import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 
-import com.mongodb.DB;
+import com.mongodb.ClientSessionOptions;
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoDatabase;
 
 /**
@@ -53,18 +54,18 @@ public abstract class YmerConverterTestBase {
 
 	@SuppressWarnings("rawtypes")
 	private final ConverterTest testCase;
-	private final MongoDbFactory dummyMongoDbFactory;
+	private final MongoDatabaseFactory dummyMongoDbFactory;
 
 	public YmerConverterTestBase(ConverterTest<?> testCase) {
 		this.testCase = testCase;
-		this.dummyMongoDbFactory = new MongoDbFactory() {
+		this.dummyMongoDbFactory = new MongoDatabaseFactory() {
 			// The MongoDbFactory is never used during the tests.
 			@Override
-			public MongoDatabase getDb(String dbName) throws DataAccessException {
+			public MongoDatabase getMongoDatabase(String dbName) throws DataAccessException {
 				return null;
 			}
 			@Override
-			public MongoDatabase getDb() throws DataAccessException {
+			public MongoDatabase getMongoDatabase() throws DataAccessException {
 				return null;
 			}
 			@Override
@@ -73,7 +74,12 @@ public abstract class YmerConverterTestBase {
 			}
 
 			@Override
-			public DB getLegacyDb() {
+			public ClientSession getSession(ClientSessionOptions options) {
+				return null;
+			}
+
+			@Override
+			public MongoDatabaseFactory withSession(ClientSession session) {
 				return null;
 			}
 		};
@@ -141,7 +147,7 @@ public abstract class YmerConverterTestBase {
 
 	protected abstract Collection<MirroredObjectDefinition<?>> getMirroredObjectDefinitions();
 
-	protected abstract MongoConverter createMongoConverter(MongoDbFactory mongoDbFactory);
+	protected abstract MongoConverter createMongoConverter(MongoDatabaseFactory mongoDbFactory);
 
 	protected static List<Object[]> buildTestCases(ConverterTest<?>... list) {
 		List<Object[]> result = new ArrayList<>();

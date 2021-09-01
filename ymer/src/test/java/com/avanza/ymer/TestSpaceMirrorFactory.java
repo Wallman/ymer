@@ -15,22 +15,23 @@
  */
 package com.avanza.ymer;
 
-import com.gigaspaces.datasource.SpaceDataSource;
-import com.gigaspaces.sync.SpaceSynchronizationEndpoint;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.MongoDbFactory;
-import org.springframework.data.mongodb.core.convert.MongoConverter;
-
 import java.util.Collection;
 import java.util.Collections;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
+import org.springframework.data.mongodb.core.convert.MongoConverter;
+
+import com.gigaspaces.datasource.SpaceDataSource;
+import com.gigaspaces.sync.SpaceSynchronizationEndpoint;
+
 public class TestSpaceMirrorFactory {
 
-	private final MongoDbFactory mongoDbFactory;
+	private final MongoDatabaseFactory mongoDbFactory;
 	private boolean exportExceptionHandlerMBean;
 
 	@Autowired
-	public TestSpaceMirrorFactory(MongoDbFactory mongoDbFactory) {
+	public TestSpaceMirrorFactory(MongoDatabaseFactory mongoDbFactory) {
 		this.mongoDbFactory = mongoDbFactory;
 	}
 

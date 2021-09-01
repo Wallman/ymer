@@ -25,10 +25,12 @@ import java.util.function.Consumer;
 
 import org.bson.Document;
 import org.junit.Test;
+
 import com.avanza.ymer.YmerInitialLoadIntegrationTest.TestSpaceObjectV1Patch;
-import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 
 import de.bwaldvogel.mongo.MongoServer;
@@ -46,7 +48,7 @@ public class MongoPartitionFilterTest {
 	public MongoPartitionFilterTest() {
 		mongoServer = new MongoServer(new MemoryBackend());
 		InetSocketAddress serverAddress = mongoServer.bind();
-		mongoClient = new MongoClient(new ServerAddress(serverAddress));
+		mongoClient = MongoClients.create("mongodb://" + new ServerAddress(serverAddress));
 	}
 
 	@Test

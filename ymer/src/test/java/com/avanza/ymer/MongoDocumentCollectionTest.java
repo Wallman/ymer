@@ -31,8 +31,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import com.avanza.ymer.MirroredObjectLoader.LoadedDocument;
 import com.avanza.ymer.plugin.PostReadProcessor;
 import com.gigaspaces.annotation.pojo.SpaceId;
-import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
@@ -57,7 +58,7 @@ public class MongoDocumentCollectionTest extends DocumentCollectionContract {
 	public MongoDocumentCollectionTest() {
 		mongoServer = new MongoServer(new MemoryBackend());
 		InetSocketAddress serverAddress = mongoServer.bind();
-		mongoClient = new MongoClient(new ServerAddress(serverAddress));
+		mongoClient = MongoClients.create("mongodb://" + new ServerAddress(serverAddress));
 	}
 
 	/* (non-Javadoc)

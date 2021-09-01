@@ -41,12 +41,13 @@ import org.junit.Test;
 import org.openspaces.core.GigaSpace;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
+import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 
 import com.avanza.gs.test.PuConfigurers;
 import com.avanza.gs.test.RunningPu;
-import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 
 import de.bwaldvogel.mongo.MongoServer;
@@ -62,7 +63,7 @@ public class InitialLoadTest {
 	public InitialLoadTest() {
 		mongoServer = new MongoServer(new MemoryBackend());
 		InetSocketAddress serverAddress = mongoServer.bind();
-		mongoClient = new MongoClient(new ServerAddress(serverAddress));
+		mongoClient = MongoClients.create("mongodb://" + new ServerAddress(serverAddress));
 	}
 
 	private RunningPu pu;
@@ -101,7 +102,7 @@ public class InitialLoadTest {
 
 	private ApplicationContext createSingleInstanceAppContext(MongoClient mongo) {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.getBeanFactory().registerSingleton("mongoClient", new SimpleMongoDbFactory(mongo, "exampleDb"));
+		context.getBeanFactory().registerSingleton("mongoClient", new SimpleMongoClientDatabaseFactory(mongo, "exampleDb"));
 		context.refresh();
 		return context;
 	}

@@ -25,9 +25,11 @@ import org.bson.Document;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
-import com.mongodb.MongoClient;
+import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
+
 import com.mongodb.ServerAddress;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
@@ -48,12 +50,11 @@ public class MirrorEnvironment {
 	public MirrorEnvironment() {
 		mongoServer = new MongoServer(new MemoryBackend());
 		InetSocketAddress serverAddress = mongoServer.bind();
-		mongoClient = new MongoClient(new ServerAddress(serverAddress));
+		mongoClient = MongoClients.create("mongodb://" + new ServerAddress(serverAddress));
 	}
 
 	public MongoTemplate getMongoTemplate() {
-		SimpleMongoDbFactory simpleMongoDbFactory = new SimpleMongoDbFactory(mongoClient, TEST_MIRROR_DB_NAME);
-		return new MongoTemplate(simpleMongoDbFactory);
+		return new MongoTemplate(mongoClient, TEST_MIRROR_DB_NAME);
 	}
 
 	private MongoDatabase getMongoDatabase() {
@@ -71,7 +72,7 @@ public class MirrorEnvironment {
 
 	public ApplicationContext getMongoClientContext() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
-		context.getBeanFactory().registerSingleton("mongoDbFactory", new SimpleMongoDbFactory(mongoClient, TEST_MIRROR_DB_NAME));
+		context.getBeanFactory().registerSingleton("mongoDbFactory", new SimpleMongoClientDatabaseFactory(mongoClient, TEST_MIRROR_DB_NAME));
 		context.refresh();
 		return context;
 	}

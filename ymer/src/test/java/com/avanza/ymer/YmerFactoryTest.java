@@ -32,8 +32,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.openspaces.core.cluster.ClusterInfo;
-import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
+
 import com.avanza.ymer.MongoDocumentCollectionTest.FakeSpaceObject;
 import com.mongodb.ReadPreference;
 import com.mongodb.client.FindIterable;
@@ -87,9 +88,9 @@ public class YmerFactoryTest {
 		assertThat(testSpaceReadPreferenceCaptor.getValue(), equalTo(ReadPreference.primaryPreferred()));
 	}
 
-	private MongoDbFactory createMockedFactory(MongoDatabase db) {
-		MongoDbFactory mongoDbFactory = mock(MongoDbFactory.class);
-		when(mongoDbFactory.getDb()).thenReturn(db);
+	private MongoDatabaseFactory createMockedFactory(MongoDatabase db) {
+		MongoDatabaseFactory mongoDbFactory = mock(MongoDatabaseFactory.class);
+		when(mongoDbFactory.getMongoDatabase()).thenReturn(db);
 		return mongoDbFactory;
 	}
 

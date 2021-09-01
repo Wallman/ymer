@@ -19,13 +19,7 @@ import java.util.stream.Stream;
 
 import org.bson.Document;
 import org.springframework.data.mongodb.core.query.Query;
-import com.mongodb.DBCollection;
-/**
- * Abstraction over {@link DBCollection}. <p>
- *
- * @author Elias Lindholm (elilin)
- *
- */
+
 interface DocumentCollection {
 
 	/**

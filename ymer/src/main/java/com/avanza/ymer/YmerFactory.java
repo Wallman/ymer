@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 
 import com.avanza.ymer.plugin.Plugin;
@@ -42,10 +42,10 @@ public final class YmerFactory {
 
 	private final MirroredObjects mirroredObjects;
 	private final MongoConverter mongoConverter;
-	private final MongoDbFactory mongoDbFactory;
+	private final MongoDatabaseFactory mongoDbFactory;
 
 
-	public YmerFactory(MongoDbFactory mongoDbFactory,
+	public YmerFactory(MongoDatabaseFactory mongoDbFactory,
 					   MongoConverter mongoConverter,
 					   Collection<MirroredObjectDefinition<?>> definitions) {
 		this.mongoDbFactory = mongoDbFactory;
@@ -109,7 +109,7 @@ public final class YmerFactory {
 	}
 
 	private SpaceMirrorContext createSpaceMirrorContext() {
-		DocumentDb documentDb = DocumentDb.mongoDb(this.mongoDbFactory.getDb(), readPreference);
+		DocumentDb documentDb = DocumentDb.mongoDb(this.mongoDbFactory.getMongoDatabase(), readPreference);
 		DocumentConverter documentConverter = DocumentConverter.mongoConverter(mongoConverter);
 		// Set the event publisher to null to avoid deadlocks when loading data in parallel
 		if (mongoConverter.getMappingContext() instanceof ApplicationEventPublisherAware) {
